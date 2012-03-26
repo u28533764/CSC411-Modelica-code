@@ -12,7 +12,7 @@ package Distillation
     Psat :=exp(A - (B/(T + C)));
   end PsatEthanol;
 
-  model Plate
+  partial model Plate
     Modelica.SIunits.MassFlowRate Fin "Feed flow rate";
     parameter Modelica.SIunits.Pressure P = 101.325
       "Pressure in the distillation column";
@@ -23,15 +23,11 @@ package Distillation
     ConnectFlow L_in "Incoming Liquid flow";
     ConnectFlow L_out "Outgoing Liquid flow";
     Modelica.SIunits.Mass M(start=0) "Mass accumulated in the plate";
-    Modelica.SIunits.MassFraction x_B "Bottoms composition";
-    Modelica.SIunits.MassFraction x_D "Distillate cmposition";
   equation
     der(M) = Fin + L_in.F + L_out.F;
     der(M*L_out.C) = Fin*z + L_in.F*L_in.C + L_out.F*L_out.C + V_in.F*V_in.C + V_out.F*V_out.C;
     L_out.F = k*M;
     L_out.C = P*V_out.C/PsatEthanol(87);
-    L_in.C = x_D;
-    x_B = P*V_in.C/PsatEthanol(89);
     V_in.F = V_out.F;
   end Plate;
 
@@ -47,8 +43,8 @@ package Distillation
       connect(plate[n].V_in,plate[n+1].V_out);
       connect(plate[n].L_out,plate[n+1].L_in);
     end for;
-    plate[1].x_B = 0.05;
-    plate[2].x_D = 0.8;
+    plate[1].L_in.C = 0.5;
+    plate[2].V_out.C = 0.8;
     plate[1].Fin = 2.8;
     plate[1].L_in.F = 1.2;
   end CombineModels;
